@@ -1,0 +1,8 @@
+--- # Poggit-CI Manifest. Open the CI at https://poggit.pmmp.io/ci/famima65536/ChasePlayer
+build-by-default: true
+branches:
+- master
+projects:
+  ChasePlayer:
+    path: ""
+...

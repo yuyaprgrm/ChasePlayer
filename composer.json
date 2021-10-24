@@ -1,0 +1,19 @@
+{
+    "name": "famima65536/chase-player",
+    "description": "pmmp plugin/api for chasing player",
+    "type": "project",
+    "require-dev": {
+        "pocketmine/pocketmine-mp": "3.*.*"
+    },
+    "license": "LGPL",
+    "autoload": {
+        "psr-4": {
+            "": "src/"
+        }
+    },
+    "authors": [{
+        "name": "famima65536",
+        "email": "famima65536@gmail.com"
+    }],
+    "require": {}
+}

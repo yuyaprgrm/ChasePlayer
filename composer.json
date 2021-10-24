@@ -3,7 +3,7 @@
     "description": "pmmp plugin/api for chasing player",
     "type": "project",
     "require-dev": {
-        "pocketmine/pocketmine-mp": "3.*.*"
+        "pocketmine/pocketmine-mp": "^3.25.0"
     },
     "license": "LGPL",
     "autoload": {
@@ -15,5 +15,7 @@
         "name": "famima65536",
         "email": "famima65536@gmail.com"
     }],
-    "require": {}
+    "require": {
+        "php": "^8.0"
+    }
 }

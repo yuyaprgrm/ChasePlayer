@@ -66,6 +66,4 @@ class ChaseAPI{
         if($chase === null || !$chase->isOnGoing())return;
         $chase->end();
     }
-
-
 }

@@ -12,6 +12,7 @@ use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataProperties;
 use pocketmine\player\GameMode;
 use pocketmine\player\Player;
 use pocketmine\scheduler\TaskHandler;
+use pocketmine\utils\TextFormat;
 
 class Chase{
 
@@ -21,7 +22,7 @@ class Chase{
     private GameMode $previousGamemode;
     private Location $previousPosition;
 
-    public function __construct(private Player $target, private Player $chaser, private TerminateCondition $terminateCondition, private ?Vector3 $offset = null){
+    public function __construct(private Player $target, private Player $chaser, private TerminateCondition $terminateCondition, private ChaseDetail $chaseDetail){
     }
 
     public function getTarget(): Player
@@ -71,31 +72,29 @@ class Chase{
     }
 
     public function link(): void{
-        $this->chaser->getNetworkProperties()->setVector3(EntityMetadataProperties::RIDER_SEAT_POSITION, $this->offset ?? new Vector3(1, 0.2, 1));
+        $this->chaser->getNetworkProperties()->setVector3(EntityMetadataProperties::RIDER_SEAT_POSITION, $this->chaseDetail->positionOffset());
         $this->chaser->getNetworkProperties()->setByte(EntityMetadataProperties::RIDER_ROTATION_LOCKED, 1, true);
-        $this->chaser->getNetworkProperties()->setFloat(EntityMetadataProperties::RIDER_SEAT_ROTATION_OFFSET, 150, true);
-        $this->chaser->getNetworkProperties()->setFloat(EntityMetadataProperties::RIDER_MIN_ROTATION, -20);
-        $this->chaser->getNetworkProperties()->setFloat(EntityMetadataProperties::RIDER_MAX_ROTATION, 20);
-        $pk = new SetActorLinkPacket();
-        $pk->link = new EntityLink(
+        $this->chaser->getNetworkProperties()->setFloat(EntityMetadataProperties::RIDER_SEAT_ROTATION_OFFSET, $this->chaseDetail->rotationOffset(), true);
+        $this->chaser->getNetworkProperties()->setFloat(EntityMetadataProperties::RIDER_MIN_ROTATION, -$this->chaseDetail->rotationAngle());
+        $this->chaser->getNetworkProperties()->setFloat(EntityMetadataProperties::RIDER_MAX_ROTATION, $this->chaseDetail->rotationAngle());
+        $pk = SetActorLinkPacket::create(new EntityLink(
             $this->target->getId(),
             $this->chaser->getId(), 
             EntityLink::TYPE_RIDER,
             false,
             false
-        );
+        ));
         $this->chaser->getNetworkSession()->sendDataPacket($pk);
     }
     
     public function unlink(): void{
-        $pk = new SetActorLinkPacket();
-        $pk->link = new EntityLink(
+        $pk = SetActorLinkPacket::create(new EntityLink(
             $this->target->getId(),
             $this->chaser->getId(), 
             EntityLink::TYPE_REMOVE,
             false,
             false
-        );
+        ));
         $this->chaser->getNetworkSession()->sendDataPacket($pk);
     }
 

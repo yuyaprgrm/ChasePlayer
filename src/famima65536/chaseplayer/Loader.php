@@ -2,6 +2,7 @@
 
 namespace famima65536\chaseplayer;
 
+use famima65536\chaseplayer\chase\ChaseDetail;
 use famima65536\chaseplayer\command\ChaseCommand;
 use pocketmine\plugin\PluginBase;
 
@@ -10,6 +11,7 @@ class Loader extends PluginBase{
     public function onLoad(): void
     {
         ChaseAPI::init($this);
+        ChaseDetail::init();
     }
 
     public function onEnable(): void

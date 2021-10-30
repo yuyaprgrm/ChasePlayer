@@ -3,6 +3,7 @@
 namespace famima65536\chaseplayer\command;
 
 use famima65536\chaseplayer\chase\Chase;
+use famima65536\chaseplayer\chase\ChaseDetail;
 use famima65536\chaseplayer\chase\TerminateCondition;
 use famima65536\chaseplayer\ChaseAPI;
 use pocketmine\command\Command;
@@ -41,7 +42,8 @@ class ChaseCommand extends Command{
             whenGetOff: $chasetime === null,
             chaseTime: $chasetime
         );
-        $chase = new Chase($target, $sender,  $condition);
+        $chaseDetail = new ChaseDetail();
+        $chase = new Chase($target, $sender,  $condition, $chaseDetail);
         ChaseAPI::getInstance()->start($chase, $force);
 
     }

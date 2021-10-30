@@ -28,13 +28,16 @@ class ChaseCommand extends Command{
         if(count($args) === 0){
             throw new InvalidCommandSyntaxException();
         }
-        $target = $sender->getServer()->getPlayerByPrefix($args[0]);
+        $targetName = $args[0];
+        $target = $sender->getServer()->getPlayerByPrefix($targetName);
         if($target === null){
             $sender->sendMessage("Target is not found in server");
             return;
         }
-        $chase = new Chase($target, $sender,  $args[1] ?? null);
-        ChaseAPI::getInstance()->start($chase, $args[2] ?? false);
+        $chasetime = isset($args[1]) ? intval($args[1]) : null;
+        $force = isset($args[2]) ? boolval($args[2]) : false;
+        $chase = new Chase($target, $sender,  $chasetime);
+        ChaseAPI::getInstance()->start($chase, $force);
 
     }
 

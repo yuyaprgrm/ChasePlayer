@@ -12,7 +12,7 @@ class ChaseCompletionTask extends Task{
     {
     }
 
-    public function onRun(int $currentTick){
+    public function onRun(): void{
         $this->chase->end();
     }
 

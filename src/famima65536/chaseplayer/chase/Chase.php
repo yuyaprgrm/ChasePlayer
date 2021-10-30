@@ -3,22 +3,23 @@
 namespace famima65536\chaseplayer\chase;
 
 use pocketmine\entity\Entity;
-use pocketmine\level\Location;
+use pocketmine\entity\Location;
 use pocketmine\math\Vector3;
-use pocketmine\network\mcpe\protocol\DataPacket;
-use pocketmine\network\mcpe\protocol\RiderJumpPacket;
 use pocketmine\network\mcpe\protocol\SetActorLinkPacket;
-use pocketmine\network\mcpe\protocol\types\EntityLink;
-use pocketmine\network\mcpe\protocol\types\GameMode;
-use pocketmine\Player;
-use raklib\protocol\Packet;
+use pocketmine\network\mcpe\protocol\types\entity\EntityLink;
+use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataFlags;
+use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataProperties;
+use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataTypes;
+use pocketmine\player\GameMode;
+use pocketmine\player\Player;
+use pocketmine\scheduler\TaskHandler;
 
 class Chase{
 
     private bool $onGoing = false;
-    public int $taskId;
+    public ?TaskHandler $taskHandler = null;
     
-    private int $previousGamemode;
+    private GameMode $previousGamemode;
     private Location $previousPosition;
 
     public function __construct(private Player $target, private Player $chaser, private ?int $chasetime = null, private ?Vector3 $offset = null){
@@ -40,8 +41,8 @@ class Chase{
 
     public function start(): void{
         $this->previousGamemode = $this->chaser->getGamemode();
-        $this->previousPosition = $this->chaser->asLocation();
-        $this->chaser->setGamemode(GameMode::SURVIVAL_VIEWER);
+        $this->previousPosition = $this->chaser->getLocation();
+        $this->chaser->setGamemode(GameMode::SPECTATOR());
         $this->chaser->setInvisible(true);
         $this->link();
         $this->chaser->sendSubTitle("famima65536に倒された！");
@@ -52,15 +53,22 @@ class Chase{
         return $this->onGoing;
     }
 
-    public function handleGetOff(){
+    public function handleGetOff(): void{
+        if(!$this->isOnGoing())
+            return;
+        if($this->chasetime === null){
+            $this->end();
+            return;
+        }
         $this->link();
     }
 
-    public function link(){
-        $this->chaser->getDataPropertyManager()->setVector3(Entity::DATA_RIDER_SEAT_POSITION, $this->offset ?? new Vector3(-1, 0.5, -1));
-        $this->chaser->getDataPropertyManager()->setByte(Entity::DATA_RIDER_ROTATION_LOCKED, 1);
-        $this->chaser->getDataPropertyManager()->setFloat(Entity::DATA_RIDER_MIN_ROTATION, -90);
-        $this->chaser->getDataPropertyManager()->setFloat(Entity::DATA_RIDER_MAX_ROTATION, 90);
+    public function link(): void{
+        $this->chaser->getNetworkProperties()->setVector3(EntityMetadataProperties::RIDER_SEAT_POSITION, $this->offset ?? new Vector3(1, 0.2, 1));
+        $this->chaser->getNetworkProperties()->setByte(EntityMetadataProperties::RIDER_ROTATION_LOCKED, 1, true);
+        $this->chaser->getNetworkProperties()->setFloat(EntityMetadataProperties::RIDER_SEAT_ROTATION_OFFSET, 150, true);
+        $this->chaser->getNetworkProperties()->setFloat(EntityMetadataProperties::RIDER_MIN_ROTATION, -20);
+        $this->chaser->getNetworkProperties()->setFloat(EntityMetadataProperties::RIDER_MAX_ROTATION, 20);
         $pk = new SetActorLinkPacket();
         $pk->link = new EntityLink(
             $this->target->getId(),
@@ -69,10 +77,10 @@ class Chase{
             false,
             false
         );
-        $this->chaser->sendDataPacket($pk);
+        $this->chaser->getNetworkSession()->sendDataPacket($pk);
     }
     
-    public function unlink(){
+    public function unlink(): void{
         $pk = new SetActorLinkPacket();
         $pk->link = new EntityLink(
             $this->target->getId(),
@@ -81,14 +89,14 @@ class Chase{
             false,
             false
         );
-        $this->chaser->sendDataPacket($pk);
+        $this->chaser->getNetworkSession()->sendDataPacket($pk);
     }
 
-    public function end(){
+    public function end(): void{
         $this->chaser->setGamemode($this->previousGamemode);
         $this->chaser->setInvisible(false);
         $this->chaser->teleport($this->previousPosition);
-        $this->unlink();
         $this->onGoing = false;
+        $this->unlink();
     }
 }

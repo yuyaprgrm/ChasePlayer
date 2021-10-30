@@ -47,9 +47,9 @@ class ChaseAPI{
         }
         $this->chasers_to_chase[$chase->getChaser()->getId()] = $this->targets_to_chase[$chase->getTarget()->getId()] = $chase;
         $chase->start();
-        if($chase->getChaseTime() !== null){
+        if($chase->getTerminateCondition()->chaseTime() !== null){
             $task = new ChaseCompletionTask($chase);
-            $chase->taskHandler = $this->plugin->getScheduler()->scheduleDelayedTask($task, (int) ($chase->getChaseTime()*Server::getInstance()->getTicksPerSecond()));
+            $chase->taskHandler = $this->plugin->getScheduler()->scheduleDelayedTask($task, (int) ($chase->getTerminateCondition()->chaseTime()*Server::getInstance()->getTicksPerSecond()));
         }
 
     }
@@ -64,9 +64,6 @@ class ChaseAPI{
     public function terminate(Player $player):void {
         $chase = $this->chasers_to_chase[$player->getId()] ?? null;
         if($chase === null || !$chase->isOnGoing())return;
-
-        $chase->taskHandler?->cancel();
-            
         $chase->end();
     }
 

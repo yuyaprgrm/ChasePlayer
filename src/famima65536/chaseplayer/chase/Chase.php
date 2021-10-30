@@ -9,7 +9,6 @@ use pocketmine\network\mcpe\protocol\SetActorLinkPacket;
 use pocketmine\network\mcpe\protocol\types\entity\EntityLink;
 use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataFlags;
 use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataProperties;
-use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataTypes;
 use pocketmine\player\GameMode;
 use pocketmine\player\Player;
 use pocketmine\scheduler\TaskHandler;
@@ -22,7 +21,7 @@ class Chase{
     private GameMode $previousGamemode;
     private Location $previousPosition;
 
-    public function __construct(private Player $target, private Player $chaser, private ?int $chasetime = null, private ?Vector3 $offset = null){
+    public function __construct(private Player $target, private Player $chaser, private TerminateCondition $terminateCondition, private ?Vector3 $offset = null){
     }
 
     public function getTarget(): Player
@@ -35,8 +34,9 @@ class Chase{
         return $this->chaser;
     }
 
-    public function getChaseTime(): ?int{
-        return $this->chasetime;
+    public function getTerminateCondition(): TerminateCondition
+    {
+        return $this->terminateCondition;
     }
 
     public function start(): void{
@@ -55,11 +55,19 @@ class Chase{
     public function handleGetOff(): void{
         if(!$this->isOnGoing())
             return;
-        if($this->chasetime === null){
+        if($this->terminateCondition->whenGetOff()){
             $this->end();
             return;
         }
         $this->link();
+    }
+
+    public function handleTargetDie(): void{
+        if(!$this->isOnGoing())
+            return;
+        if($this->terminateCondition->whenTargetDie()){
+            $this->end();
+        }
     }
 
     public function link(): void{
@@ -97,5 +105,6 @@ class Chase{
         $this->chaser->teleport($this->previousPosition);
         $this->onGoing = false;
         $this->unlink();
+        $this->taskHandler?->cancel();
     }
 }

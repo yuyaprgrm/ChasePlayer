@@ -45,7 +45,6 @@ class Chase{
         $this->chaser->setGamemode(GameMode::SPECTATOR());
         $this->chaser->setInvisible(true);
         $this->link();
-        $this->chaser->sendSubTitle("famima65536に倒された！");
         $this->onGoing = true;
     }
 

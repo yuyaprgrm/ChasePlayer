@@ -11,7 +11,6 @@ class Loader extends PluginBase{
     public function onLoad(): void
     {
         ChaseAPI::init($this);
-        ChaseDetail::init();
     }
 
     public function onEnable(): void

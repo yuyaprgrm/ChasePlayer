@@ -13,7 +13,7 @@ class ChaseDetail{
     public static int $defaultDistance = 2;
     public static int $defaultYaw = 0;
     
-    private ?Vector3 $positionOffset;
+    private Vector3 $positionOffset;
     private int $rotationOffset;
     private int $rotationAngle;
 

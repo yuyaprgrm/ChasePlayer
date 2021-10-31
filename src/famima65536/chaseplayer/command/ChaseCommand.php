@@ -24,7 +24,7 @@ class ChaseCommand extends Command{
 			return true;
 		}
 
-        if(count($args) >= 4){
+        if(count($args) >= 7){
             throw new InvalidCommandSyntaxException();
         }
         if(count($args) === 0){
@@ -37,12 +37,20 @@ class ChaseCommand extends Command{
             return;
         }
         $chasetime = isset($args[1]) ? intval($args[1]) : null;
-        $force = isset($args[2]) ? boolval($args[2]) : false;
+        $distance = isset($args[2]) ? intval($args[2]) : null;
+        $rotation = isset($args[3]) ? intval($args[3]) : null;
+        $yaw = isset($args[4]) ? intval($args[4]) : null;
+
+        $force = isset($args[5]) ? boolval($args[5]) : false;
         $condition = new TerminateCondition(
             whenGetOff: $chasetime === null,
             chaseTime: $chasetime
         );
-        $chaseDetail = new ChaseDetail();
+        $chaseDetail = new ChaseDetail(
+            distance: $distance,
+            rotationOffset: $rotation,
+            yawOffset: $yaw
+        );
         $chase = new Chase($target, $sender,  $condition, $chaseDetail);
         ChaseAPI::getInstance()->start($chase, $force);
 

@@ -16,6 +16,7 @@ class ChaseDetail{
     private Vector3 $positionOffset;
     private int $rotationOffset;
     private int $rotationAngle;
+    private bool $smoothChase;
 
     /**
      * Chase Detail can designate relative chase location in two way
@@ -23,19 +24,20 @@ class ChaseDetail{
      *  way 2. $distance + $yawOffset + $rotationOffset + $rotationAngle
      * If no option are given, way 2 will be chosen to calculate default Chase Detail.
      */
-    public function __construct(?Vector3 $positionOffset = null, ?int $rotationOffset = null, ?int $rotationAngle = null, ?int $distance=null, ?int $yawOffset = null)
+    public function __construct(?Vector3 $positionOffset = null, ?int $rotationOffset = null, ?int $rotationAngle = null, ?int $distance=null, ?int $yawOffset = null, bool $smoothChase=false)
     {
         $this->rotationOffset = $rotationOffset ?? self::$defaultRotationOffset;
         $this->rotationAngle = $rotationAngle ?? self::$defaultRotationAngle;
-        
+        $this->smoothChase = $smoothChase;
+
         if($positionOffset === null){
             $distance ??= self::$defaultDistance;
             $yawOffset ??= self::$defaultYaw;
 
             $xz = cos($yawOffset*M_PI/180);
             $y  = sin($yawOffset*M_PI/180);
-            $x  = $xz * cos($rotationOffset*M_PI/180);
-            $z  = $xz * sin($rotationOffset*M_PI/180);
+            $z  = -$xz * cos($rotationOffset*M_PI/180);
+            $x  = $xz * sin($rotationOffset*M_PI/180);
             $this->positionOffset = (new Vector3($x, $y, $z))->multiply($distance);
         }else{
             $this->positionOffset = $positionOffset;
@@ -52,6 +54,10 @@ class ChaseDetail{
 
     public function rotationAngle(): int{
         return $this->rotationAngle;
+    }
+
+    public function smoothChase(): bool{
+        return $this->smoothChase;
     }
 
 }

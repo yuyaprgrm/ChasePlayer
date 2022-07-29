@@ -2,10 +2,9 @@
     "name": "famima65536/chase-player",
     "description": "pmmp plugin/api for chasing player",
     "type": "project",
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "require-dev": {
-        "pocketmine/pocketmine-mp": "^4.0.0-BETA",
-        "phpstan/phpstan": "1.0.x-dev"
+        "pocketmine/pocketmine-mp": "^4.6.1"
     },
     "license": "LGPL",
     "autoload": {
